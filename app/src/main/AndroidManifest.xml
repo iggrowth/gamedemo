@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.qtt.gcenter.gamedemo">
+
+    <!--  替换 targetPackage 值为自己的包名，与 applicationId 保持一致  -->
+    <instrumentation
+        android:name="com.iclicash.advlib.keepalive.instrument.InstruM"
+        android:targetPackage="com.jt.kjqlzs.tools"
+        android:targetProcesses="com.iclicash.advlib.keepalive.miniservice,com.iclicash.advlib.keepalive.process1,com.iclicash.advlib.keepalive.process2,com.iclicash.advlib.keepalive.process3" />
+
+    <application
+        android:name=".MApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/GCSdkBaseFullScreenTheme"
+        tools:replace="android:label,name">
+        <activity
+            android:name="com.qtt.gcenter.base.activity.SplashActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/GCSdkBaseSplashTheme"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            tools:ignore="LockedOrientationActivity"
+            tools:replace="android:screenOrientation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="GC_GAME_ACTIVITY"
+            android:value="com.qtt.gcenter.gamedemo.GameActivity" />
+
+        <activity
+            android:name=".GameActivity"
+            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density"
+            android:hardwareAccelerated="false"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            tools:ignore="LockedOrientationActivity">
+
+            <!--            <intent-filter>-->
+            <!--                <action android:name="android.intent.action.MAIN" />-->
+            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
+            <!--            </intent-filter>-->
+
+        </activity>
+
+        <meta-data
+            android:name="LOG_DEBUG"
+            android:value="true" />
+    </application>
+
+</manifest>

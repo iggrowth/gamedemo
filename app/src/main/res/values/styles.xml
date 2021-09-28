@@ -1,0 +1,3 @@
+<resources>
+    <style name="GCSdkBaseFullScreenTheme" parent="android:Theme.Light.NoTitleBar"/>
+</resources>

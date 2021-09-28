@@ -1,0 +1,117 @@
+boolean isBuildAar = false
+if (isBuildAar) {
+    apply plugin: 'com.android.library'
+} else {
+    apply plugin: 'com.android.application'
+}
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
+
+    defaultConfig {
+        if (!isBuildAar) {
+            applicationId "com.jt.kjqlzs.tools"
+            multiDexEnabled true
+        }
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    signingConfigs {
+        debug {
+            keyAlias 'qukandian'
+            keyPassword 'qukandianvideoqkd'
+            storeFile file('gamewords.keystore')
+            storePassword 'qukandianvideoqkd'
+        }
+
+        release {
+            keyAlias 'qukandian'
+            keyPassword 'qukandianvideoqkd'
+            storeFile file('gamewords.keystore')
+            storePassword 'qukandianvideoqkd'
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            versionNameSuffix "-debug"
+            minifyEnabled false
+            shrinkResources false
+        }
+
+        release {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        exclude 'META-INF/proguard/androidx-annotations.pro'
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+
+}
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+
+    // sdk 核心组件
+    if (isBuildAar){
+        compileOnly 'com.ig.game.center:opensdk-core:4.0.920210902140530' // 请选用最新的版本，详情参照对接文档，打aar给游戏中心的时候使用这个
+    } else {
+        implementation 'com.ig.game.center:opensdk-core:4.0.920210902140530' // 请选用最新的版本，详情参照对接文档
+    }
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+
+    implementation 'com.getkeepsafe.relinker:relinker:1.4.1'    // 加载动态链接库工具
+    // sdk 依赖组件
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
+    implementation 'com.tencent:mmkv-static:1.0.23'             // mmkv
+    implementation 'com.qtt.gcenter.third:miit_mdid:1.0.10'     // oaid 支持库
+    implementation 'com.github.bumptech.glide:glide:4.3.1'      // glide图片库
+    implementation 'com.qtt.gcenter.sdk:qq_login:6.0.1.9'       // qq登录支持库
+    implementation 'com.qtt.gcenter.sdk:cmic-code:9.2.0.1'      // 移动支持库
+    implementation 'com.qtt.gcenter.sdk:xiaowo-core:3.2.0'      // 联调支持库
+    implementation 'com.qtt.gcenter.sdk:tencent-x5:4.3.0'       // x5 支持库
+    implementation 'com.meituan.android.walle:library:1.1.3'    // 美团walle库
+    implementation 'org.greenrobot:eventbus:3.1.1'              // eventBus
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'      // retrofit
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
+
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'       // rxAndroid
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:5.4.3' // 微信登录sdk
+
+    implementation 'com.qtt.gcenter.third:weiboSdkCore:4.3.7.1'  //新浪微博组件
+    implementation 'com.google.zxing:core:3.0.1'
+
+    implementation 'com.qtt.game.center:face_verify:1.0.0'
+    implementation 'com.qtt.gcenter.third:face_plus:0.0.0.1'
+}

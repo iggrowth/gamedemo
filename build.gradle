@@ -1,0 +1,97 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+        // sdk 依赖的仓库地址
+        maven { url 'http://maven.iggrowth.cn/repository/maven-public/' }
+        maven { url 'http://nexus.inuozhen.com/repository/maven-public/' }
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        // 如果需要集成友盟，需配置如下仓库地址
+        maven { url 'https://dl.bintray.com/umsdk/release' }
+        //推送
+        maven { url "http://mvn.gt.igexin.com/nexus/content/repositories/releases/" }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.4'
+        classpath 'me.tatarka:gradle-retrolambda:3.7.0' // retrolambda
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        // sdk 依赖的仓库地址
+        maven { url 'http://maven.iggrowth.cn/repository/maven-public/' }
+        maven { url 'http://nexus.inuozhen.com/repository/maven-public/' }
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        // 如果需要集成友盟，需配置如下仓库地址
+        maven { url 'https://dl.bintray.com/umsdk/release' }
+        //推送
+        maven { url "http://mvn.gt.igexin.com/nexus/content/repositories/releases/" }
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+private static String getDemoVersion() {
+    File buildFile = new File('./app/build.gradle')
+    String v = ''
+    if (buildFile.exists()) {
+        buildFile.readLines().each { line ->
+            if (line.contains("com.ig.game.center:opensdk-core")) {
+                println('------> ' + line.trim())
+                Pattern p = Pattern.compile("(['\"])com.ig.game.center:opensdk-core:.*(['\"])")
+                Matcher m = p.matcher(line)
+                if (m.find()) {
+                    v = m.group(0).replaceAll("['\"]", '').replace("com.ig.game.center:opensdk-core:", '')
+                }
+            }
+        }
+    }
+    if (v == '') {
+        println('------> 啥也没找到，就用默认的吧')
+        return 'v4.0.9'
+    } else {
+        println("------>[v]:" + v)
+        return v
+    }
+
+}
+
+task exportDemoProject(type: Zip, group: "zipDemo") {
+    into('app') {
+        from('app/build.gradle', 'app/gamewords.keystore', 'app/proguard-rules.pro')
+    }
+    into('app/libs') {
+        from('app/libs')
+    }
+    into('gradle') {
+        from('gradle')
+    }
+    into('app/src') {
+        from('app/src')
+    }
+
+    from('build.gradle', 'settings.gradle', 'gradle.properties', 'gradlew', 'gradlew.bat')
+
+    destinationDir file('./.export/')
+    baseName 'GCenterSdk'
+    appendix 'demo'
+    version getDemoVersion()
+    extension 'zip'
+    classifier 'source'
+}
+
