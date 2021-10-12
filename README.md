@@ -1,7 +1,7 @@
 [接入文档](http://dev.iggrowth.cn/sdk/docs/index.html#/native_v2/README.md)
 
 demo接入请全局搜索（或者todo中查找），找到接入代码<br/>
-(Android Studio 全局搜索快捷键：Ctrl+h)
+(Android Studio 全局搜索快捷键：Cmd+shift+f或者Ctrl+h)
 
 ![image.png](./imgs/search.png)
 
@@ -101,3 +101,15 @@ demo接入请全局搜索（或者todo中查找），找到接入代码<br/>
 
     //todo 7.1、激励视频超级翻倍-start
     //todo 7.1、激励视频超级翻倍-end
+
+## 8、金币活动（接入游戏中心金币体系）
+[金币活动接入文档_请跳转](http://dev.iggrowth.cn/sdk/docs/index.html#/native_v2/api_gold_coin)
+
+    //todo 8.1、七天签到-start
+    //todo 8.1、七天签到-end
+
+    //todo 8.2、翻卡活动-start
+    //todo 8.2、翻卡活动-end
+
+    //todo 8.3、提现券提现-start
+    //todo 8.3、提现券提现-end

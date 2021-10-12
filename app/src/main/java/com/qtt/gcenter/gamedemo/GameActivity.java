@@ -1,5 +1,6 @@
 package com.qtt.gcenter.gamedemo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -17,14 +18,19 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jifen.qu.open.upload.utils.ToastUtils;
+import com.kyleduo.switchbutton.SwitchButton;
 import com.qtt.gcenter.sdk.GCenterSDK;
 import com.qtt.gcenter.sdk.ads.options.AggregateAdOption;
 import com.qtt.gcenter.sdk.ads.options.BannerAdOption;
+import com.qtt.gcenter.sdk.ads.options.ExtraRewardResultOption;
 import com.qtt.gcenter.sdk.ads.options.FeedAdOption;
+import com.qtt.gcenter.sdk.ads.options.FloatSpecialRewardOption;
 import com.qtt.gcenter.sdk.ads.options.InterActionAdOption;
 import com.qtt.gcenter.sdk.ads.options.InteractivePageAdOption;
 import com.qtt.gcenter.sdk.ads.options.PullLiveAdOption;
 import com.qtt.gcenter.sdk.ads.options.RewardVideoOption;
+import com.qtt.gcenter.sdk.ads.options.SmallAmountWithDrawOption;
 import com.qtt.gcenter.sdk.ads.options.SmallVideoAdOption;
 import com.qtt.gcenter.sdk.common.GCCode;
 import com.qtt.gcenter.sdk.entities.GCReportInfo;
@@ -34,8 +40,10 @@ import com.qtt.gcenter.sdk.interfaces.IAdBannerCallBack;
 import com.qtt.gcenter.sdk.interfaces.IAdDefaultCallBack;
 import com.qtt.gcenter.sdk.interfaces.IAdInterActionCallBack;
 import com.qtt.gcenter.sdk.interfaces.IAuthCallback;
+import com.qtt.gcenter.sdk.interfaces.IExtraRewardCallBack;
 import com.qtt.gcenter.sdk.interfaces.IGCCallBack;
 import com.qtt.gcenter.sdk.interfaces.IGCViewStateListener;
+import com.qtt.gcenter.sdk.interfaces.IWithDrawStateListener;
 
 import java.util.HashMap;
 
@@ -52,14 +60,17 @@ public class GameActivity extends Activity implements View.OnClickListener {
     private EditText etVideo;
     private EditText etInteraction;
     private EditText etFeed;
-    private EditText etFeed2;
     private EditText etBanner;
     private EditText etPl;
     private EditText etAggregate;
 
-    private String openId = "";
+    private SwitchButton switchSmallAmount;
+    private SwitchButton switchFloatSpecialReward;
+
+    private String openId = "";//
 
     private boolean hasLogin = false; // IG SDK是否已登录
+    private GCUserInfo userInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +89,15 @@ public class GameActivity extends Activity implements View.OnClickListener {
 
         activity = GameActivity.this;
         setContentView(R.layout.activity_game);
+        //todo 1.5、初始化-start
         //初始化
         GCenterSDK.getInstance().init(GameActivity.this, sdkCallBack);
+        //todo 1.5、初始化-end
+
+        //todo 1.8、设置游戏内部热更版本号-start
+        //这里参数1： 游戏内部框架版本号,选传，没有可传”“，参数2：游戏内部资源版本号,必传（游戏自己定义的版本号），没有热更可以不用调用该api
+        GCenterSDK.getInstance().setGameHotFixedVersion("", "");
+        //todo 1.8、设置游戏内部热更版本号-end
 
         Button btLogin = findViewById(R.id.bt_login);
         Button btFeedBack = findViewById(R.id.bt_feedback);
@@ -92,7 +110,6 @@ public class GameActivity extends Activity implements View.OnClickListener {
         etInteraction = findViewById(R.id.et_interaction);
 
         etFeed = findViewById(R.id.et_feed_ad);
-        etFeed2 = findViewById(R.id.et_feed_ad2);
         etBanner = findViewById(R.id.et_banner_ad);
         etPl = findViewById(R.id.et_pl_ad);
         etAggregate = findViewById(R.id.et_aggregate_ad);
@@ -100,9 +117,12 @@ public class GameActivity extends Activity implements View.OnClickListener {
         adContainer = findViewById(R.id.view_ad_container);
         smallVideoAdContainer = findViewById(R.id.view_small_video_ad_container);
 
+        switchSmallAmount = findViewById(R.id.switch_smallAmountWithdraw);
+        switchFloatSpecialReward = findViewById(R.id.switch_float_reward);
+        switchSmallAmount.setCheckedImmediately(true);
+
         findViewById(R.id.bt_interaction_ad).setOnClickListener(this);
         findViewById(R.id.bt_feed_ad).setOnClickListener(this);
-        findViewById(R.id.bt_feed_ad2).setOnClickListener(this);
         findViewById(R.id.bt_banner_ad).setOnClickListener(this);
         findViewById(R.id.bt_pl_ad).setOnClickListener(this);
         findViewById(R.id.bt_aggregate_ad).setOnClickListener(this);
@@ -112,16 +132,28 @@ public class GameActivity extends Activity implements View.OnClickListener {
         findViewById(R.id.bt_small_video_ad_pause).setOnClickListener(this);
         findViewById(R.id.bt_small_video_ad_resume).setOnClickListener(this);
         findViewById(R.id.bt_small_video_ad_recycle).setOnClickListener(this);
+        findViewById(R.id.bt_smallAmountWithdraw).setOnClickListener(this);
 
         btLogin.setOnClickListener(this);
-        // IG金币提现
+        btFeedBack.setOnClickListener(this);
+        btLogout.setOnClickListener(this);
+        btAdVideo.setOnClickListener(this);
+        btAdBanner.setOnClickListener(this);
+        btUpLoadInfo.setOnClickListener(this);
+
+        //todo 3.1、IG游戏中心金币-提现-start
+        //IG金币提现
         findViewById(R.id.bt_withdraw_ig).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //跳转一个提现页面，内部提现
                 GCenterSDK.getInstance().openWithDrawPage();
             }
         });
-        // 游戏自己金币提现
+        //todo 3.1、IG游戏中心金币-提现-end
+
+        //todo 3.2、游戏自己货币-提现-start
+        //游戏自己金币提现：客户端调用authWithdraw发起授权校验，成功后通知游戏服务器向IG服务器发起提现订单（具体见服务端提现文档）
         findViewById(R.id.bt_withdraw_cp).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -147,12 +179,10 @@ public class GameActivity extends Activity implements View.OnClickListener {
                 );
             }
         });
-        btFeedBack.setOnClickListener(this);
-        btLogout.setOnClickListener(this);
-        btAdVideo.setOnClickListener(this);
-        btAdBanner.setOnClickListener(this);
-        btUpLoadInfo.setOnClickListener(this);
+        //todo 3.2、游戏自己货币-提现-end
 
+
+        //todo 4.1、开屏广告-start
         GCenterSDK.getInstance().showSplashAd(this, new IGCViewStateListener() {
             @Override
             public void show(View view, String msg) {
@@ -164,23 +194,32 @@ public class GameActivity extends Activity implements View.OnClickListener {
                 toast("开屏广告关闭");
             }
         });
+        //todo 4.1、开屏广告-end
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            //todo 2.1、登录-start
             case R.id.bt_login:
-                // 登录
+                // 登录（默认游客登录，如果需要微信或手机号登录，找游戏中心运营更改配置即可）
                 GCenterSDK.getInstance().login();
-                break;
-            case R.id.bt_feedback:
-                // 客服
-                GCenterSDK.getInstance().openFeedBackPage();
                 break;
             case R.id.bt_logout:
                 // 登出
                 GCenterSDK.getInstance().logout();
                 break;
+            //todo 2.1、登录-end
+
+            //todo 2.2、客服-start
+            case R.id.bt_feedback:
+                // 客服
+                GCenterSDK.getInstance().openFeedBackPage();
+                break;
+            //todo 2.2、客服-end
+
+            //todo 4、广告-start
             case R.id.bt_video_ad:
                 // 激励视频广告 >> 获取index
                 String videoIndex = etVideo.getEditableText().toString();
@@ -191,23 +230,12 @@ public class GameActivity extends Activity implements View.OnClickListener {
                 String interactionIndex = etInteraction.getEditableText().toString();
                 showInteractionAd(interactionIndex);
                 break;
-            case R.id.bt_uploadInfo:
-                // 信息上报
-                reportRoleInfo();
-                break;
             case R.id.bt_feed_ad:
                 String index = etFeed.getText().toString();
                 if (TextUtils.isEmpty(index)) {
                     index = "feed1";
                 }
                 showFeedAd(index);
-                break;
-            case R.id.bt_feed_ad2:
-                String index2 = etFeed2.getText().toString();
-                if (TextUtils.isEmpty(index2)) {
-                    index2 = "feed2";
-                }
-                showFeedAd(index2);
                 break;
             case R.id.bt_banner_ad:
                 String bannerIndex = etBanner.getText().toString();
@@ -227,6 +255,7 @@ public class GameActivity extends Activity implements View.OnClickListener {
                 }
                 showAggregateAd(agIndex);
                 break;
+            //todo 4.6、小视频广告-start
             case R.id.bt_small_video_ad:
                 showSmallVideoAd();
                 break;
@@ -243,6 +272,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
                 GCenterSDK.getInstance().getSmallVideoPlayController().recycle();
                 smallVideoAdContainer.removeAllViews();
                 break;
+            //todo 4.6、小视频广告-end
+
+            //todo 4.9、互动广告-start
             case R.id.bt_interactive_page_ad:
                 adContainer.removeAllViews();
                 InteractivePageAdOption interActionAdOption = new InteractivePageAdOption();
@@ -250,10 +282,42 @@ public class GameActivity extends Activity implements View.OnClickListener {
                 interActionAdOption.index = "intpage1";
                 GCenterSDK.getInstance().showInteractivePageAd(this, interActionAdOption);
                 break;
+            //todo 4.9、互动广告-end
+            //todo 4、广告-end
+
+            case R.id.bt_uploadInfo:
+                // 数据上报
+                reportRoleInfo();
+                break;
+
+            case R.id.bt_smallAmountWithdraw:
+                //小额提现任务
+                startSmallAmountTask();
+                break;
+            case R.id.bt_float_reward:
+                //激励视频超级翻倍
+                startFloatSpecialReward();
+                break;
+            //todo 8.2、翻卡活动-start
+            case R.id.bt_cards:
+                //翻卡活动-点击打开页面
+                GCenterSDK.getInstance().openPage(activity, "ig://com.ig.game?class=dialog_cards");
+                break;
+            //todo 8.2、翻卡活动-end
+
+            //todo 8.3、提现券提现-start
+            case R.id.bt_coupon:
+                //提现券提现-点击打开页面
+                //todo 这里coupon_key请向游戏中心运营获取
+                GCenterSDK.getInstance().openPage(this, "ig://com.ig.game?class=activity_coupon&coupon_key=COUPON_KEY");
+                //todo 服务端接入见接入文档
+                break;
+            //todo 8.3、提现券提现-end
 
         }
     }
 
+    //todo 4.2、激励视频广告-start
     private void showRewardAd(String index) {
         RewardVideoOption option = new RewardVideoOption();
         option.index = index;   // 请cp同学在不同的视频广告位置定义一个index
@@ -269,6 +333,12 @@ public class GameActivity extends Activity implements View.OnClickListener {
             public void onAdLoadSuccess() {
                 super.onAdLoadSuccess();
                 toast("广告加载成功");
+            }
+
+            @Override
+            public void onAdLoadSuccess(double rate) {
+                super.onAdLoadSuccess(rate);
+
             }
 
             @Override
@@ -311,7 +381,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
             }
         });
     }
+    //todo 4.2、激励视频广告-end
 
+    //todo 4.3、插屏广告-start
     private void showInteractionAd(String index) {
         InterActionAdOption option = new InterActionAdOption();
         option.index = index;
@@ -347,7 +419,49 @@ public class GameActivity extends Activity implements View.OnClickListener {
             }
         });
     }
+    //todo 4.3、插屏广告-end
 
+    //todo 4.4、banner广告-start
+    private void showBannerAd(String index) {
+        adContainer.removeAllViews();
+        BannerAdOption bannerAdOption = new BannerAdOption();
+        bannerAdOption.index = index;
+        GCenterSDK.getInstance().showBannerAd(adContainer, bannerAdOption, new IAdBannerCallBack() {
+            @Override
+            public void onAdLoadStart() {
+                Log.d(TAG, "banner onAdLoadStart");
+            }
+
+            @Override
+            public void onAdLoadSuccess() {
+                Log.d(TAG, "banner onAdLoadSuccess");
+            }
+
+            @Override
+            public void onAdLoadFailure(String s) {
+                Log.d(TAG, "banner onAdLoadFailure, msg = " + s);
+            }
+
+            @Override
+            public void onAdClick() {
+                Log.d(TAG, "banner onAdClick");
+            }
+
+            @Override
+            public void onADExposed() {
+                Log.d(TAG, "banner onADExposed");
+            }
+
+            @Override
+            public void onAdFailed(String s) {
+                Log.d(TAG, "banner onAdFailed, msg = " + s);
+            }
+
+        });
+    }
+    //todo 4.4、banner广告-end
+
+    //todo 4.5、信息流广告-start
     private void showFeedAd(String index) {
         adContainer.removeAllViews();
         FeedAdOption feedAdOption2 = new FeedAdOption();
@@ -389,7 +503,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
             }
         });
     }
+    //todo 4.5、信息流广告-end
 
+    //todo 4.6、小视频广告-start
     private void showSmallVideoAd() {
         smallVideoAdContainer.removeAllViews();
         SmallVideoAdOption smallVideoAdOption = new SmallVideoAdOption();
@@ -432,45 +548,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
             }
         });
     }
+    //todo 4.6、小视频广告-end
 
-    private void showBannerAd(String index) {
-        adContainer.removeAllViews();
-        BannerAdOption bannerAdOption = new BannerAdOption();
-        bannerAdOption.index = index;
-        GCenterSDK.getInstance().showBannerAd(adContainer, bannerAdOption, new IAdBannerCallBack() {
-            @Override
-            public void onAdLoadStart() {
-                Log.d(TAG, "banner onAdLoadStart");
-            }
-
-            @Override
-            public void onAdLoadSuccess() {
-                Log.d(TAG, "banner onAdLoadSuccess");
-            }
-
-            @Override
-            public void onAdLoadFailure(String s) {
-                Log.d(TAG, "banner onAdLoadFailure, msg = " + s);
-            }
-
-            @Override
-            public void onAdClick() {
-                Log.d(TAG, "banner onAdClick");
-            }
-
-            @Override
-            public void onADExposed() {
-                Log.d(TAG, "banner onADExposed");
-            }
-
-            @Override
-            public void onAdFailed(String s) {
-                Log.d(TAG, "banner onAdFailed, msg = " + s);
-            }
-
-        });
-    }
-
+    //todo 4.7、拉活/次留广告-start
     private void showPlAd(String index) {
         adContainer.removeAllViews();
         PullLiveAdOption pullLiveAdOption = new PullLiveAdOption();
@@ -513,7 +593,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
 
         });
     }
+    //todo 4.7、拉活/次留广告-end
 
+    //todo 4.8、聚合广告-start
     private void showAggregateAd(String index) {
         adContainer.removeAllViews();
         AggregateAdOption aggregateAdOption = new AggregateAdOption();
@@ -557,7 +639,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
 
         });
     }
+    //todo 4.8、聚合广告-end
 
+    //todo 5、数据上报-start
     private void reportRoleInfo() {
         GCReportInfo info = new GCReportInfo.Builder()
                 .setInfoType(GCReportInfo.TYPE_LOGIN)       //【必传】上传信息类型：【TYPE_LOGIN 登陆】【TYPE_INFO 信息上报】【TYPE_LOGON 创角】
@@ -577,10 +661,85 @@ public class GameActivity extends Activity implements View.OnClickListener {
         GCenterSDK.getInstance().reportInfo(info);
         toast(info.toString());
     }
+    //todo 5、数据上报-end
+
+    //todo 6、小额提现任务-start
+    //具体任务内容见接入文档
+    private void startSmallAmountTask() {
+        SmallAmountWithDrawOption option = new SmallAmountWithDrawOption();
+        option.index = "sqq_test";
+
+        //深度激励，选接--start
+        //以下为深度激励参数，选接，具体看文档
+        option.extraReward = 1;//0-不接，1-接入(如果设置1接入后以下三个参入必传，否则报错)
+        option.extraRewardAmount = "0.4";//额外奖励发放金额，请传入数字类型的字符串请勿使用其他字符串
+        option.extraRewardUnit = "元";//额外奖励展示单位，由产品商定后自己定义：元，金币，红包等
+        //发放奖励的回调，收到该回调后，cp发放奖励，发放成功后再告知SDK，具体见以下接入代码
+        option.extraRewardCallBack = new IExtraRewardCallBack() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "小额提现 额外任务完成，游戏客户端发放奖励并告知sdk");
+                toast("额外任务完成，游戏客户端发放奖励并告知sdk");
+                //todo 游戏发放奖励，发放完成调用以下接口
+                //模拟游戏发奖励，发放完成调用
+                ExtraRewardResultOption rewardResultOption = new ExtraRewardResultOption();
+                if (switchSmallAmount.isChecked()) {
+                    rewardResultOption.specialRewardAmount = "0.4";
+                    rewardResultOption.rewardResult = ExtraRewardResultOption.RESULT_SUCCESS;
+                } else {
+                    rewardResultOption.rewardResult = ExtraRewardResultOption.RESULT_FAILED;
+                    rewardResultOption.errorMsg = "奖励发放失败";
+                }
+                GCenterSDK.getInstance().requestSmallAmountExtraReward(rewardResultOption);
+            }
+        };
+        //深度激励，选接--end
+
+        GCenterSDK.getInstance().showSmallAmountWithdrawAd(this, option, new IWithDrawStateListener() {
+            @Override
+            public void onFail() {
+                Log.d(TAG, "小额提现 onfail");
+                toast("提现失败");
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "小额提现 onComplete");
+                toast("提现任务完成");
+            }
+        });
+    }
+    //todo 6、小额提现任务-end
+
+    //todo 7.1、激励视频超级翻倍-start
+    //具体任务内容见接入文档
+    private void startFloatSpecialReward() {
+        FloatSpecialRewardOption floatSpecialRewardOption = new FloatSpecialRewardOption();
+        floatSpecialRewardOption.index = "floatSpecialReward";
+        GCenterSDK.getInstance().showFloatSpecialReward(this, floatSpecialRewardOption, new IExtraRewardCallBack() {
+            @Override
+            public void onSuccess() {
+                toast("任务完成，游戏客户端发放奖励并告知sdk, 发放-" + (switchFloatSpecialReward.isChecked() ? "成功" : "失败"));
+                //todo 游戏发放奖励，发放完成调用以下接口
+                //模拟游戏发奖励，发放完成调用
+                ExtraRewardResultOption rewardResultOption = new ExtraRewardResultOption();
+                if (switchFloatSpecialReward.isChecked()) {
+                    rewardResultOption.specialRewardAmount = "500";//具体值向戏中心产品获取
+                    rewardResultOption.rewardResult = ExtraRewardResultOption.RESULT_SUCCESS;
+                } else {
+                    rewardResultOption.rewardResult = ExtraRewardResultOption.RESULT_SUCCESS;
+                    rewardResultOption.errorMsg = "奖励发放失败";
+                }
+                GCenterSDK.getInstance().requestFloatSpecialReward(rewardResultOption);
+            }
+        });
+    }
+    //todo 7.1、激励视频超级翻倍-end
 
     private IGCCallBack sdkCallBack = new IGCCallBack() {
         @Override
         public void initCallBack(int code, String msg) {
+            //todo 1.5、初始化-start
             if (code == GCCode.CODE_INIT_SUCCESS) {
                 tvStatus.append("初始化成功\n");
             } else if (code == GCCode.CODE_INIT_FAILURE) {
@@ -588,11 +747,14 @@ public class GameActivity extends Activity implements View.OnClickListener {
             } else {
                 toast("初始化:未知错误");
             }
+            //todo 1.5、初始化-end
         }
 
         @Override
         public void loginCallBack(int code, String msg, GCUserInfo entity) {
+            //todo 2.1、登录-start
             if (code == GCCode.CODE_LOGIN_SUCCESS) {
+                userInfo = entity;
                 hasLogin = true;
                 String ticket = entity.ticket;
                 String appId = entity.appId;
@@ -600,6 +762,13 @@ public class GameActivity extends Activity implements View.OnClickListener {
                 tvStatus.append("登录成功 :\n" + entity.toString() + " " + msg + "\n");
                 // TODO: 登录成功，游戏方请在此处登录走自己的登录，前往游戏服务器端进行验证，换取openId
                 // openId = "xxx";
+
+                //微信登录返回的信息（SDK版本：4.1.1新增，请更新至该版本获取）
+                if (entity.ext != null) {
+                    String loginType = entity.ext.get("loginType");//登录方式
+                    String wechatNickname = entity.ext.get("wechatNickname");//微信昵称
+                    String wechatAvatar = entity.ext.get("wechatAvatar");//微信头像
+                }
             } else if (code == GCCode.CODE_NO_INIT) {
                 toast("未初始化");
             } else if (code == GCCode.CODE_LOGIN_FAILURE) {
@@ -607,10 +776,12 @@ public class GameActivity extends Activity implements View.OnClickListener {
             } else {
                 toast(code + ": " + msg);
             }
+            //todo 2.1、登录-end
         }
 
         @Override
         public void logoutCallBack(int code, String msg) {
+            //todo 2、设置游戏内部热更版本号-start
             if (code == GCCode.CODE_NO_INIT) {
                 toast("未初始化");
             } else if (code == GCCode.CODE_LOGOUT_SUCCESS) {
@@ -624,6 +795,7 @@ public class GameActivity extends Activity implements View.OnClickListener {
             } else {
                 toast("未知错误");
             }
+            //todo 2、设置游戏内部热更版本号-end
         }
 
         @Override
@@ -633,7 +805,43 @@ public class GameActivity extends Activity implements View.OnClickListener {
                 GCenterSDK.getInstance().closeApp();
             }
         }
+
+        /**
+         * 金币活动-接入游戏中心的金币体系才能使用，选接
+         */
+        @Override
+        public void businessCallBack(int code, Object msg) {
+            switch (code) {
+                //todo 8.1、七天签到-start
+                //7天签到
+                case GCCode.CODE_SEVEN_SIGN_SUCCESS://签到领金币
+                    Log.d(TAG, "CODE_SEVEN_SIGN_SUCCESS" + msg);
+                    getCoin(userInfo.appId, userInfo.platform, userInfo.ticket, openId);
+                    break;
+                case GCCode.CODE_SEVEN_SIGN_VIDEO_SUCCESS://签到看激励视频翻倍领金币
+                    Log.d(TAG, "CODE_SEVEN_SIGN_VIDEO_SUCCESS" + msg);
+                    getCoin(userInfo.appId, userInfo.platform, userInfo.ticket, openId);
+                    break;
+                //todo 8.1、七天签到-end
+
+                //todo 8.2、翻卡活动-start
+                case GCCode.CODE_CARDS_COIN_ADD://翻卡领取金币
+                    int coinAdd = (int) msg;
+                    toast("翻卡领取金币" + coinAdd);
+                    getCoin(userInfo.appId, userInfo.platform, userInfo.ticket, openId);
+                    break;
+                case GCCode.CODE_CARDS_TODAY_TASK_DONE://今日翻卡任务全部完成
+                    toast("今日翻卡已完成 " + msg);
+                    break;
+                //todo 8.2、翻卡活动-end
+            }
+        }
+
     };
+
+    public void getCoin(final String app_id, final String platform, final String ticket, final String open_id) {
+        //todo 游戏客户端调用游戏服务端，然后游戏服务端再调用游戏中心服务端发放金币
+    }
 
     private void toast(final String msg) {
         runOnUiThread(new Runnable() {
@@ -645,6 +853,7 @@ public class GameActivity extends Activity implements View.OnClickListener {
     }
 
 
+    //todo 1.6、退出游戏-设置挽留弹窗-start
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -653,6 +862,9 @@ public class GameActivity extends Activity implements View.OnClickListener {
         }
         return super.onKeyDown(keyCode, event);
     }
+    //todo 1.6、退出游戏-设置挽留弹窗-end
+
+    //todo 1.7、生命周期设置-start
 
     /********************以下是生命周期方法的调用 start********************/
     @Override
@@ -728,4 +940,5 @@ public class GameActivity extends Activity implements View.OnClickListener {
     }
 
     /********************以上是生命周期方法的调用  end ********************/
+    //todo 1.7、生命周期设置-end
 }

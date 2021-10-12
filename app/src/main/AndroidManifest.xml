@@ -3,12 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.qtt.gcenter.gamedemo">
 
-    <!--  替换 targetPackage 值为自己的包名，与 applicationId 保持一致  -->
-    <instrumentation
-        android:name="com.iclicash.advlib.keepalive.instrument.InstruM"
-        android:targetPackage="com.jt.kjqlzs.tools"
-        android:targetProcesses="com.iclicash.advlib.keepalive.miniservice,com.iclicash.advlib.keepalive.process1,com.iclicash.advlib.keepalive.process2,com.iclicash.advlib.keepalive.process3" />
-
+    <!-- //todo 1.3、App AndroidManifest配置-start -->
     <application
         android:name=".MApplication"
         android:allowBackup="true"
@@ -32,6 +27,7 @@
             </intent-filter>
         </activity>
 
+        <!-- //todo 这里的value请填写app的主activtiy全路径名 -->
         <meta-data
             android:name="GC_GAME_ACTIVITY"
             android:value="com.qtt.gcenter.gamedemo.GameActivity" />
@@ -45,16 +41,8 @@
             android:windowSoftInputMode="stateHidden|adjustPan"
             tools:ignore="LockedOrientationActivity">
 
-            <!--            <intent-filter>-->
-            <!--                <action android:name="android.intent.action.MAIN" />-->
-            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-            <!--            </intent-filter>-->
-
         </activity>
 
-        <meta-data
-            android:name="LOG_DEBUG"
-            android:value="true" />
     </application>
-
+    <!-- //todo 1.3、App AndroidManifest配置-end -->
 </manifest>

@@ -1,19 +1,24 @@
+//todo 具体gradle配置见打包配置文档：http://dev.iggrowth.cn/sdk/docs/index.html#/native_v2/packaging
+//todo 1.2、App Build.gradle配置-start
 boolean isBuildAar = false
 if (isBuildAar) {
     apply plugin: 'com.android.library'
 } else {
     apply plugin: 'com.android.application'
 }
+//todo 1.2、App Build.gradle配置-end
 
 android {
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
 
     defaultConfig {
+        //todo 1.2、App Build.gradle配置-start
         if (!isBuildAar) {
             applicationId "com.jt.kjqlzs.tools"
             multiDexEnabled true
         }
+        //todo 1.2、App Build.gradle配置-end
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 1
@@ -55,6 +60,7 @@ android {
         }
     }
 
+    //todo 1.2、App Build.gradle配置-start
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -63,6 +69,7 @@ android {
     packagingOptions {
         exclude 'META-INF/proguard/androidx-annotations.pro'
     }
+
     sourceSets {
         main {
             jniLibs.srcDirs = ['libs']
@@ -74,16 +81,18 @@ android {
             dirs 'libs'
         }
     }
+    //todo 1.2、App Build.gradle配置-end
 
 }
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
 
-    // sdk 核心组件
+    //todo 1.2、App Build.gradle配置-start
+    //sdk 核心组件
     if (isBuildAar){
-        compileOnly 'com.ig.game.center:opensdk-core:4.0.920210902140530' // 请选用最新的版本，详情参照对接文档，打aar给游戏中心的时候使用这个
+        compileOnly 'com.ig.game.center:opensdk-core:4.1.3.20211009153808' // 请选用最新的版本，详情参照对接文档，打aar给游戏中心的时候使用这个
     } else {
-        implementation 'com.ig.game.center:opensdk-core:4.0.920210902140530' // 请选用最新的版本，详情参照对接文档
+        implementation 'com.ig.game.center:opensdk-core:4.1.3.20211009153808' // 请选用最新的版本，详情参照对接文档
     }
     implementation 'com.android.support:appcompat-v7:28.0.0'
 
@@ -114,4 +123,9 @@ dependencies {
 
     implementation 'com.qtt.game.center:face_verify:1.0.0'
     implementation 'com.qtt.gcenter.third:face_plus:0.0.0.1'
+    //todo 1.2、App Build.gradle配置-end
+
+
+    //demo使用的组件
+    implementation 'com.kyleduo.switchbutton:library:1.4.4'
 }

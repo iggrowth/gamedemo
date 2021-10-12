@@ -21,12 +21,20 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="#cccccc"
+            android:padding="5dp"
             android:textColor="@color/gc_color_black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="账户登录："
+            android:textColor="@android:color/holo_red_light"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:gravity="start"
             android:orientation="horizontal">
 
@@ -43,12 +51,27 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="登出" />
+
+
+            <Button
+                android:id="@+id/bt_feedback"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="客服" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="提现："
+            android:textColor="@android:color/holo_red_light"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:gravity="start"
             android:orientation="horizontal">
 
@@ -70,36 +93,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="start"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/bt_uploadInfo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="数据采集" />
-
-            <Button
-                android:id="@+id/bt_feedback"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="客服" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="广告：" />
+                android:text="广告："
+                android:textColor="@android:color/holo_red_light"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -251,26 +253,11 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/bt_feed_ad2"
-            android:layout_width="130dp"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="信息流广告：样式2"
-            android:textSize="10dp" />
-
-        <EditText
-            android:id="@+id/et_feed_ad2"
-            android:layout_width="130dp"
-            android:layout_height="wrap_content"
-            android:hint="信息流广告2index"
-            android:textSize="10dp" />
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:text="注意：信息流，拉活次留，聚合广告的index由cp接入方定义好，然后给sdk同学配置对应的广告。demo这里已经配置好，无需更改"
+            android:text="注意：拉活次留，聚合广告的index由cp接入方定义好，然后给sdk同学配置对应的广告。demo这里已经配置好，无需更改"
             android:textColor="@android:color/holo_red_light" />
 
         <RelativeLayout
@@ -340,5 +327,98 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="互动广告（跳到H5落地页）" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="数据采集上报："
+            android:textColor="@android:color/holo_red_light"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/bt_uploadInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="数据采集" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="小额提现："
+            android:textColor="@android:color/holo_red_light"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/switch_smallAmountWithdraw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="15dp"
+                android:checked="true" />
+
+            <Button
+                android:id="@+id/bt_smallAmountWithdraw"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="小额提现" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="额外激励活动："
+            android:textColor="@android:color/holo_red_light"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/switch_float_reward"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="15dp"
+                android:checked="true" />
+
+            <Button
+                android:id="@+id/bt_float_reward"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="激励视频超级翻倍" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="接入游戏中心的金币体系-金币活动："
+            android:textColor="@android:color/holo_red_light"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/bt_cards"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="翻卡活动-点击打开页面" />
+
+        <Button
+            android:id="@+id/bt_coupon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="提现券提现-点击打开页面" />
+
     </LinearLayout>
 </ScrollView>
