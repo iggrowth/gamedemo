@@ -14,6 +14,13 @@
         android:supportsRtl="true"
         android:theme="@style/GCSdkBaseFullScreenTheme"
         tools:replace="android:label,name">
+
+        <!-- IG SDK Debug标志位，CP自行打发行包时需移除或设为false -->
+        <meta-data
+            android:name="LOG_DEBUG"
+            android:value="true"
+            tools:replace="android:value" />
+
         <activity
             android:name="com.qtt.gcenter.base.activity.SplashActivity"
             android:screenOrientation="portrait"

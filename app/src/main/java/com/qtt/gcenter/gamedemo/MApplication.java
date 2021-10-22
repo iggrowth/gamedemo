@@ -34,7 +34,6 @@ public class MApplication extends GameApplication {
                 .setNativeId("1073")
                 .setVersionId("502")
                 .setAppNameEn("igkjqlzsgame")
-                .setDebug(true)
                 .build();
 
     }
@@ -47,8 +46,7 @@ public class MApplication extends GameApplication {
      */
     @Override
     public ConfigParams getConfigParams() {
-        return new ConfigParams()
-                .setDebug(true);
+        return new ConfigParams();
     }
 
     /**
